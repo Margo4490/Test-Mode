@@ -11,6 +11,8 @@ import static com.codeborne.selenide.Condition.exactText;
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.*;
 import static data.DataGenerator.*;
+import static data.DataGenerator.Registration.getRandomLogin;
+import static data.DataGenerator.Registration.getRandomPassword;
 
 public class AuthTest {
 
@@ -22,64 +24,66 @@ public class AuthTest {
 
     @Test
     void shouldActiveUser() {
+        Configuration.holdBrowserOpen = true;
+        open("http://localhost:9999/");
         RegistrationInfo user = DataGenerator.Registration.getRegisteredUser("active");
-        sendRequest(user);
         $x("//input[@type='text']").val(user.getLogin());
         $x("//input[@type='password']").val(user.getPassword());
         $x("//span[@class='button__text']").click();
-        $x("//div[@id='root']").should(visible);
-
+        $x("//*[contains(text(), 'Личный кабинет')]").should(Condition.visible, Duration.ofSeconds(10));
     }
 
     @Test
     void shouldBlockedUser() {
         RegistrationInfo user = DataGenerator.Registration.getRegisteredUser("blocked");
-        sendRequest(user);
         $x("//input[@type='text']").val(user.getLogin());
         $x("//input[@type='password']").val(user.getPassword());
         $x("//span[@class='button__text']").click();
-        $x("//div[@class='notification__content']").should(visible);
+        $x("//div[@class='notification__content']").should(Condition.visible, Duration.ofSeconds(10));
 
     }
 
     @Test
     void shouldIncorrectPassword() {
         RegistrationInfo user = DataGenerator.Registration.getRegisteredUser("blocked");
-        sendRequest(user);
         $x("//input[@type='text']").val(user.getLogin());
         $x("//input[@type='password']").val(getRandomPassword());
         $x("//span[@class='button__text']").click();
-        $x("//div[@id='root']").should(visible);
+        $x("//div[@class='notification__content']")
+                .shouldHave(Condition.text("Ошибка! Неверно указан логин или пароль"), Duration.ofSeconds(10));
 
     }
 
     @Test
     void shouldIncorrectLogin() {
         RegistrationInfo user = DataGenerator.Registration.getRegisteredUser("blocked");
-        sendRequest(user);
+
         $x("//input[@type='text']").val(getRandomLogin());
         $x("//input[@type='password']").val(user.getPassword());
         $x("//span[@class='button__text']").click();
-        $x("//div[@id='root']").should(visible);
+        $x("//div[@class='notification__content']")
+                .shouldHave(Condition.text("Ошибка! Неверно указан логин или пароль"), Duration.ofSeconds(10));
     }
 
     @Test
     void shouldNotLogin() {
         RegistrationInfo user = DataGenerator.Registration.getRegisteredUser("blocked");
-        sendRequest(user);
+
         //логин не введен
         $x("//input[@type='password']").val(user.getPassword());
         $x("//span[@class='button__text']").click();
-        $("[data-test-id='login'].input_invalid .input__sub").should(Condition.visible);
+        $("[data-test-id='login'].input_invalid .input__sub")
+                .shouldHave(Condition.text("Поле обязательно для заполнения"), Duration.ofSeconds(10));
     }
 
     @Test
     void shouldNotPassword() {
         RegistrationInfo user = DataGenerator.Registration.getRegisteredUser("blocked");
-        sendRequest(user);
+
         $x("//input[@type='text']").val(user.getLogin());
         //пароль не введен
         $x("//span[@class='button__text']").click();
-        $("[data-test-id='password'].input_invalid .input__sub").should(Condition.visible);
+        $("[data-test-id='password'].input_invalid .input__sub")
+                .shouldHave(Condition.text("Поле обязательно для заполнения"), Duration.ofSeconds(10));
     }
 }

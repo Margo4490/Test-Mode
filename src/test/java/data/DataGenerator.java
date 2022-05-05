@@ -16,7 +16,9 @@ public class DataGenerator {
     private DataGenerator() {
 
     }
-
+    public static class Registration {
+        private Registration() {
+        }
     private static final RequestSpecification requestSpec = new RequestSpecBuilder()
             .setBaseUri("http://localhost")
             .setPort(9999)
@@ -50,18 +52,15 @@ public class DataGenerator {
         return password;
     }
 
-    public static class Registration{
-        private Registration() {
-
-        }
-
-        public static RegistrationInfo getUser(String status) {
+        public static RegistrationInfo getNewUser(String status) {
             RegistrationInfo user = new RegistrationInfo(getRandomLogin(), getRandomPassword(), status);
             return user;
         }
 
+
         public static RegistrationInfo getRegisteredUser(String status) {
-            RegistrationInfo registeredUser = getUser(status);
+            RegistrationInfo registeredUser = getNewUser(status);
+            sendRequest(registeredUser);
             return registeredUser;
         }
 
